@@ -57,28 +57,33 @@ body {
 
 .screen__inner {
     width: 100%;
-    max-width: var(--page-max-width);
+    max-width: 820px;
     margin: 0 auto;
-    padding: 24px 24px 32px;
-    display: grid;
-    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
-    column-gap: 40px;
+    padding: 40px 24px 48px;
+    display: flex;
+    flex-direction: column;
     align-items: center;
+    text-align: center;
 }
 
-/* ====== Левая часть (логотип + заголовок + кнопка) ====== */
+.wheel-layout {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 32px;
+}
 
 .wheel-hero__logo img {
     height: 40px;
     width: auto;
     display: block;
-    margin-bottom: 16px;
 }
 
 .wheel-hero__title {
-    margin: 0 0 24px;
+    margin: 0;
     font-family: "Forum", serif;
-    font-size: 88.774px;
+    font-size: 64px;
     font-style: normal;
     font-weight: 400;
     line-height: 90%;
@@ -88,12 +93,7 @@ body {
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-}
-
-.wheel-hero {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    width: 100%;
 }
 
 /* ====== Колесо ====== */
@@ -102,11 +102,12 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+    width: 100%;
 }
 
 .wheel-stage__inner {
     position: relative;
-    width: min(640px, 90vw);
+    width: min(550px, 90vw);
     aspect-ratio: 1 / 1;
 }
 
@@ -136,12 +137,15 @@ body {
     border: none;
     cursor: pointer;
     font-family: inherit;
-    font-weight: 800;
+    font-weight: 400;
     font-size: 16px;
     line-height: 1;
     padding: 14px 32px;
     border-radius: 999px;
     transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .btn span {
@@ -149,11 +153,29 @@ body {
 }
 
 .btn--primary {
-    background: radial-gradient(circle at top, #ffe89b, #ffbf3e);
+    display: flex;
+    width: 295px;
+    height: 56px;
+    padding: 14px 30.58px 15px 29.42px;
+    justify-content: center;
+    align-items: center;
+    border-radius: 1000px;
+    background: linear-gradient(180deg, #ffd343 -20.54%, #f5dc87 20.13%, #ffd343 71.29%, #f8d974 116.07%);
     box-shadow:
-        0 6px 16px rgba(0, 0, 0, 0.45),
-        0 0 0 1px rgba(255, 255, 255, 0.15) inset;
-    color: #4b2300;
+        0 2px 3.3px rgba(0, 0, 0, 0.25),
+        0 1px 11.2px rgba(0, 0, 0, 0.25),
+        0 1px 2px rgba(255, 255, 255, 0.8) inset,
+        0 -1.6px 1px rgba(0, 0, 0, 0.35) inset,
+        0 2px 9.9px rgba(255, 255, 255, 0.34) inset;
+    color: #9f372c;
+    text-align: center;
+    -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: #9f372c;
+    font-family: "Forum", serif;
+    font-size: 29.961px;
+    line-height: 90%;
+    letter-spacing: 0.899px;
+    text-transform: uppercase;
 }
 
 .btn--primary:hover {
@@ -168,6 +190,10 @@ body {
     box-shadow:
         0 3px 10px rgba(0, 0, 0, 0.6),
         0 0 0 1px rgba(255, 255, 255, 0.25) inset;
+}
+
+.wheel-layout__cta {
+    margin-top: 8px;
 }
 
 /* ====== POPUP ====== */
@@ -204,8 +230,8 @@ body {
 
 .popup-card {
     position: relative;
-    width: 600px;
-    height: 600px;
+    width: 550px;
+    height: 550px;
     z-index: 1;
     border-radius: 64px;
     background: #212121;
@@ -236,12 +262,12 @@ body {
 }
 
 .popup-card__eyebrow {
-    margin: 0 0 32px;
+    margin: 0 0 24px;
     color: #c2c2c2;
     font-family: "Onest", sans-serif;
     font-size: 36px;
     font-weight: 400;
-    letter-spacing: 6.48px;
+    letter-spacing: 1px;
     text-transform: uppercase;
 }
 
@@ -257,7 +283,7 @@ body {
 }
 
 .popup-card__description {
-    margin: 24px 0 16px;
+    margin: 8px 0 24px;
     color: #fff;
     font-family: "Forum", serif;
     font-size: 44px;
@@ -271,7 +297,7 @@ body {
     margin: 0;
     color: #c2c2c2;
     font-family: "Onest", sans-serif;
-    font-size: 36px;
+    font-size: 24px;
     font-weight: 400;
     line-height: 110%;
 }
@@ -347,23 +373,23 @@ body {
 
 .popup--open .popup__gift--tl {
     opacity: 1;
-    left: 18%;
-    top: 18%;
-    transform: translate(-50%, -50%) scale(1);
+    left: 30%;
+    top: 21%;
+    transform: translate(-50%, -50%) scale(2.5);
 }
 
 .popup--open .popup__gift--tr {
     opacity: 1;
-    left: 82%;
-    top: 14%;
-    transform: translate(-50%, -50%) scale(1);
+    left: 68%;
+    top: 20%;
+    transform: translate(-50%, -50%) scale(1.3) rotate(4deg);
 }
 
 .popup--open .popup__gift--bl {
     opacity: 1;
-    left: 22%;
-    top: 82%;
-    transform: translate(-50%, -50%) scale(1);
+    left: 31%;
+    top: 79%;
+    transform: translate(-50%, -50%) scale(1.5) rotate(-51deg);
 }
 
 .popup--open .popup__gift--br {

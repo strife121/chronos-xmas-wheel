@@ -16,32 +16,21 @@
     <!-- ====== ЭКРАН С КОЛЕСОМ ====== -->
     <section class="screen screen--wheel">
       <div class="screen__inner">
-
-        <!-- Левая часть: логотип + заголовок + кнопка -->
-        <div class="wheel-hero">
+        <div class="wheel-layout">
           <div class="wheel-hero__logo">
             <img src="assets/logo.svg" alt="Chronos" />
           </div>
-
-          <h1 class="wheel-hero__title">
-            Дарит подарки
-          </h1>
-
-          <button class="btn btn--primary" id="spinBtn" type="button">
+          <h1 class="wheel-hero__title">Дарит подарки</h1>
+          <div class="wheel-stage">
+            <div class="wheel-stage__inner">
+              <img class="wheel-stage__arrow" src="assets/arrow.png" alt="Стрелка колеса" />
+              <img class="wheel-stage__wheel" src="assets/wheel.png" alt="Колесо подарков" />
+            </div>
+          </div>
+          <button class="btn btn--primary wheel-layout__cta" id="spinBtn" type="button">
             <span>Крутить колесо</span>
           </button>
         </div>
-
-        <!-- Правая часть: колесо -->
-        <div class="wheel-stage">
-          <div class="wheel-stage__inner">
-            <img class="wheel-stage__arrow" src="assets/arrow.png" alt="Стрелка колеса" />
-            <img class="wheel-stage__wheel" src="assets/wheel.png" alt="Колесо подарков" />
-            <!-- стрелка можно отдельно если нужно -->
-            <!-- <img class="wheel-stage__pointer" src="assets/pointer.svg" alt=""> -->
-          </div>
-        </div>
-
       </div>
     </section>
 
