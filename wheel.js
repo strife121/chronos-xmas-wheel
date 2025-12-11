@@ -49,6 +49,7 @@ const resultPopup = document.getElementById('resultPopup');
 const popupEmphasis = document.getElementById('popupEmphasis');
 const popupDescription = document.getElementById('popupDescription');
 const popupRedeemLink = document.getElementById('popupRedeemLink');
+const confettiCanvas = document.getElementById('confettiCanvas');
 
 let spinning = false;
 let hasSpun = false;
@@ -57,6 +58,8 @@ let redeemUrl = null;
 let lastPrizeId = null;
 let lastPrizeLabel = null;
 let lastPrizeLink = null;
+let confettiInstance = null;
+let confettiAnimationFrame = null;
 
 const slice = 360 / SECTORS_COUNT;
 const norm = deg => ((deg % 360) + 360) % 360;
@@ -80,6 +83,52 @@ function togglePopupVisibility(visible) {
   if (pageRoot) {
     pageRoot.classList.toggle('page--popup-visible', Boolean(visible && popupExists));
   }
+}
+
+function ensureConfettiInstance() {
+  if (!confettiCanvas || typeof window.confetti !== 'function') return null;
+  if (!confettiInstance) {
+    confettiInstance = window.confetti.create(confettiCanvas, { resize: true, useWorker: true });
+  }
+  return confettiInstance;
+}
+
+function stopPopupConfetti() {
+  if (confettiAnimationFrame) {
+    cancelAnimationFrame(confettiAnimationFrame);
+    confettiAnimationFrame = null;
+  }
+  if (confettiInstance && typeof confettiInstance.reset === 'function') {
+    confettiInstance.reset();
+  }
+}
+
+function startPopupConfetti(duration = 5000) {
+  stopPopupConfetti();
+  const instance = ensureConfettiInstance();
+  if (!instance) return;
+  const colors = ['#FFD343', '#F5DC87', '#F8D974', '#FFC94A', '#FFF1BD'];
+  const end = Date.now() + duration;
+  const launch = () => {
+    instance({
+      particleCount: 6,
+      spread: 70,
+      gravity: 0.9,
+      decay: 0.92,
+      startVelocity: 12,
+      ticks: 300,
+      scalar: 1.1,
+      shapes: ['polygon'],
+      colors,
+      origin: { x: Math.random(), y: -0.1 }
+    });
+    if (Date.now() < end) {
+      confettiAnimationFrame = requestAnimationFrame(launch);
+    } else {
+      confettiAnimationFrame = null;
+    }
+  };
+  launch();
 }
 
 function splitPrizeLabel(label) {
@@ -127,10 +176,12 @@ function updatePopupContent(label, link) {
 function openResultPopup(label, link) {
   updatePopupContent(label, link);
   togglePopupVisibility(true);
+  startPopupConfetti();
 }
 
 function closeResultPopup() {
   togglePopupVisibility(false);
+  stopPopupConfetti();
 }
 
 function setResultMessage(message) {

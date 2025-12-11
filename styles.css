@@ -394,9 +394,9 @@ body {
 
 .popup--open .popup__gift--br {
     opacity: 1;
-    left: 80%;
-    top: 78%;
-    transform: translate(-50%, -50%) scale(1);
+    left: 66%;
+    top: 85%;
+    transform: translate(-50%, -50%) scale(2) rotate(19deg);
 }
 
 /* Мобилка */
@@ -436,4 +436,12 @@ body {
         font-size: 32px;
         height: 72px;
     }
+}
+.confetti-canvas {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 35;
 }
