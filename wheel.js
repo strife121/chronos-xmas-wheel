@@ -24,11 +24,11 @@ const SECTOR_LINKS = {
   s1: '',
   s2: 'https://p.chronos.mg/offer-avatar?utm_source=landing&utm_medium=wheel&utm_campaign=newyear2026&utm_content=avatar30',
   s3: 'https://sbsite.pro//ChronosPlusPromo_1',
-  s4: 'https://p.chronos.mg/offer-avatar?utm_source=landing&utm_medium=wheel&utm_campaign=newyear2026&utm_content=avatar30',
+  s4: 'https://p.chronos.mg/ktoya45?utm_source=landing&utm_medium=wheel&utm_campaign=newyear2026&utm_content=ktoya45',
   s5: '',
   s6: 'https://p.chronos.mg/ny/prognosis/pr?utm_source=landing&utm_medium=wheel&utm_campaign=newyear2025&utm_content=prognoznagod',
   s7: 'https://t.me/chronos_io_bot?start=ny26-5quest-wheel',
-  s8: 'https://t.me/chronos_io_bot?start=ny26-5quest-wheel',
+  s8: 'https://t.me/chronos_io_bot?start=ny26-1month-wheel',
   s9: 'https://p.chronos.mg/newme_rec?utm_source=landing&utm_medium=wheel&utm_campaign=newyear2026&utm_content=newme_rec'
 };
 
