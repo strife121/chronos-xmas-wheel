@@ -56,7 +56,7 @@ body {
 .screen--wheel {
     align-items: flex-start;
     min-height: auto;
-    padding: 48px 0 120px;
+    padding: 32px 0 96px;
 }
 
 .page--popup-visible .screen--wheel {
@@ -123,7 +123,7 @@ body {
 
 .wheel-stage__inner {
     position: relative;
-    width: min(550px, 90vw);
+    width: min(450px, 90vw);
     aspect-ratio: 1 / 1;
 }
 
@@ -415,7 +415,7 @@ body {
     }
 
     .screen--wheel {
-        padding: 32px 0 80px;
+        padding: 24px 0 64px;
     }
 
     .wheel-layout {
