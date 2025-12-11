@@ -59,7 +59,7 @@ let lastPrizeId = null;
 let lastPrizeLabel = null;
 let lastPrizeLink = null;
 let confettiInstance = null;
-let confettiAnimationFrame = null;
+let confettiInterval = null;
 
 const slice = 360 / SECTORS_COUNT;
 const norm = deg => ((deg % 360) + 360) % 360;
@@ -94,41 +94,45 @@ function ensureConfettiInstance() {
 }
 
 function stopPopupConfetti() {
-  if (confettiAnimationFrame) {
-    cancelAnimationFrame(confettiAnimationFrame);
-    confettiAnimationFrame = null;
+  if (confettiInterval) {
+    clearInterval(confettiInterval);
+    confettiInterval = null;
   }
   if (confettiInstance && typeof confettiInstance.reset === 'function') {
     confettiInstance.reset();
   }
 }
 
-function startPopupConfetti(duration = 5000) {
+function startPopupConfetti(duration = 15_000) {
   stopPopupConfetti();
   const instance = ensureConfettiInstance();
   if (!instance) return;
-  const colors = ['#FFD343', '#F5DC87', '#F8D974', '#FFC94A', '#FFF1BD'];
-  const end = Date.now() + duration;
-  const launch = () => {
-    instance({
-      particleCount: 6,
-      spread: 70,
-      gravity: 0.9,
-      decay: 0.92,
-      startVelocity: 12,
-      ticks: 300,
-      scalar: 1.1,
-      shapes: ['polygon'],
-      colors,
-      origin: { x: Math.random(), y: -0.1 }
-    });
-    if (Date.now() < end) {
-      confettiAnimationFrame = requestAnimationFrame(launch);
-    } else {
-      confettiAnimationFrame = null;
+
+  const animationEnd = Date.now() + duration;
+  const defaults = { startVelocity: 15, spread: 360, ticks: 60, zIndex: 0, shapes: ['polygon'] };
+  const randomInRange = (min, max) => Math.random() * (max - min) + min;
+
+  confettiInterval = setInterval(() => {
+    const timeLeft = animationEnd - Date.now();
+    if (timeLeft <= 0) {
+      stopPopupConfetti();
+      return;
     }
-  };
-  launch();
+
+    const particleCount = 50 * (timeLeft / duration);
+    instance(
+      Object.assign({}, defaults, {
+        particleCount,
+        origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+      })
+    );
+    instance(
+      Object.assign({}, defaults, {
+        particleCount,
+        origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+      })
+    );
+  }, 250);
 }
 
 function splitPrizeLabel(label) {
