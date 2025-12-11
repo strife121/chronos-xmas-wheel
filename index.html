@@ -27,14 +27,17 @@
             Дарит подарки
           </h1>
 
-          <button class="btn btn--primary" type="button">
+          <button class="btn btn--primary" id="spinBtn" type="button">
             <span>Крутить колесо</span>
           </button>
+
+          <p class="wheel-hero__result" id="spinResult"></p>
         </div>
 
         <!-- Правая часть: колесо -->
         <div class="wheel-stage">
           <div class="wheel-stage__inner">
+            <img class="wheel-stage__arrow" src="assets/arrow.png" alt="Стрелка колеса" />
             <img class="wheel-stage__wheel" src="assets/wheel.png" alt="Колесо подарков" />
             <!-- стрелка можно отдельно если нужно -->
             <!-- <img class="wheel-stage__pointer" src="assets/pointer.svg" alt=""> -->
@@ -71,8 +74,7 @@
 
   </div>
 
-  <!-- На шаге 1 JS не подключаем, только верстка.
-       Чтобы посмотреть попап, временно добавь класс .popup--open в div.popup -->
+  <script src="./wheel.js" defer></script>
 </body>
 
 </html>

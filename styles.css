@@ -66,21 +66,33 @@ body {
 
 .wheel-hero__title {
     margin: 0 0 24px;
-    font-size: 40px;
-    font-weight: 800;
-    letter-spacing: 0.16em;
+    font-family: "Forum", serif;
+    font-size: 88.774px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 90%;
+    letter-spacing: 2.663px;
     text-transform: uppercase;
-    color: var(--accent-gold);
-}
-
-.wheel-hero__title::first-line {
-    letter-spacing: 0.2em;
+    background: linear-gradient(90deg, #d9eef8 -11.43%, #ffe1a0 51.75%, #dfeeff 110.26%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .wheel-hero {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+}
+
+.wheel-hero__result {
+    margin-top: 16px;
+    min-height: 1.2em;
+    font-size: 18px;
+    line-height: 1.2;
+    color: var(--text-main);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
 }
 
 /* ====== Колесо ====== */
@@ -93,7 +105,7 @@ body {
 
 .wheel-stage__inner {
     position: relative;
-    width: min(420px, 90vw);
+    width: min(640px, 90vw);
     aspect-ratio: 1 / 1;
 }
 
@@ -102,6 +114,19 @@ body {
     height: 100%;
     display: block;
     object-fit: contain;
+    transform-origin: calc(50% + 1.5px) calc(50% + 0.2px);
+}
+
+.wheel-stage__arrow {
+    position: absolute;
+    width: 62px;
+    height: 99px;
+    left: 18px;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    object-fit: contain;
+    z-index: 2;
+    pointer-events: none;
 }
 
 /* ====== Кнопки ====== */
@@ -246,9 +271,8 @@ body {
         align-items: center;
     }
 
-    .wheel-hero__title {
-        font-size: 28px;
-        letter-spacing: 0.12em;
+    .wheel-hero__result {
+        text-align: center;
     }
 
     .wheel-stage__inner {
