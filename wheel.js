@@ -13,7 +13,7 @@ const SECTOR_LABELS = {
   s3: 'Бесплатно месяц Chronos Plus',
   s4: '45% скидку на Консультацию "Кто я?',
   s5: 'Бесплатную диагностику с астрологом',
-  s6: '50% скидку на годовой Chronos Plus',
+  s6: '50% скидку на годовой прогноз',
   s7: 'Бесплатно 5 вопросов ИИ-астрологу',
   s8: 'Бесплатный месяц ИИ-астролога',
   s9: '30% скидку на программу “Свой год. Свои правила. Свои желания”'
@@ -28,7 +28,7 @@ const SECTOR_LINKS = {
   s5: '',
   s6: 'https://p.chronos.mg/ny/prognosis/pr?utm_source=landing&utm_medium=wheel&utm_campaign=newyear2025&utm_content=prognoznagod',
   s7: 'https://t.me/chronos_io_bot?start=ny26-5quest-wheel',
-  s8: 'https://t.me/chronos_io_bot?start=ny26-1month-wheel',
+  s8: 'https://t.me/chronos_io_bot?start=ny26-5quest-wheel',
   s9: 'https://p.chronos.mg/newme_rec?utm_source=landing&utm_medium=wheel&utm_campaign=newyear2026&utm_content=newme_rec'
 };
 
