@@ -18,6 +18,17 @@ const SECTOR_LABELS = {
   s8: 'Бесплатный месяц ИИ-астролога',
   s9: '30% скидку на программу “Свой год. Свои правила. Свои желания”'
 };
+const SECTOR_LABELS_EN = {
+  s1: 'Free personalized growth plan',
+  s2: '30% off the Stellar Avatar',
+  s3: 'Free month of Chronos Plus',
+  s4: '45% off the "Who am I?" consultation',
+  s5: 'Free diagnostic session with an astrologer',
+  s6: '50% off annual Chronos Plus',
+  s7: 'Free 5 questions to the AI astrologer',
+  s8: 'Free month of the AI astrologer',
+  s9: '30% off "Own Your Year" program'
+};
 const SECTOR_PROBABILITY = [0, 20, 5, 20, 0, 20, 9, 6, 20];
 
 const SECTOR_LINKS = {
@@ -58,6 +69,8 @@ let redeemUrl = null;
 let lastPrizeId = null;
 let lastPrizeLabel = null;
 let lastPrizeLink = null;
+let pendingSpinClickTimestamp = null;
+const PAGE_LOADED_AT = Date.now();
 let confettiInstance = null;
 let confettiInterval = null;
 
@@ -83,6 +96,24 @@ function togglePopupVisibility(visible) {
   if (pageRoot) {
     pageRoot.classList.toggle('page--popup-visible', Boolean(visible && popupExists));
   }
+}
+
+function getTimeOnSiteFrom(ts = Date.now()) {
+  return Math.max(0, (ts || Date.now()) - PAGE_LOADED_AT);
+}
+
+function pushAnalyticsEvent(eventName, payload = {}) {
+  if (!eventName) return;
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push({
+    event: eventName,
+    ...payload
+  });
+}
+
+function getPrizeTranslation(id) {
+  if (!id) return '';
+  return SECTOR_LABELS_EN[id] || lastPrizeLabel || '';
 }
 
 function ensureConfettiInstance() {
@@ -315,6 +346,13 @@ function handleSpinComplete() {
 
   updateResultText(id, label);
   openResultPopup(label, link);
+  if (pendingSpinClickTimestamp) {
+    pushAnalyticsEvent('wheel_spin_click', {
+      time_on_site_ms: getTimeOnSiteFrom(pendingSpinClickTimestamp),
+      prize_label_en: getPrizeTranslation(id)
+    });
+    pendingSpinClickTimestamp = null;
+  }
 
   window.dataLayer = window.dataLayer || [];
   window.dataLayer.push({
@@ -350,6 +388,7 @@ function runSpin() {
   spinning = true;
   spinBtn.disabled = true;
   setResultMessage('Колесо крутится...');
+  pendingSpinClickTimestamp = Date.now();
 
   const chosenIndex = weightedRandomIndex();
   const autoCenter = (chosenIndex + 0.5) * slice + BASE_SHIFT;
@@ -387,6 +426,15 @@ if (spinBtn && rotor) {
   spinBtn.addEventListener('click', runSpin);
 } else {
   console.warn('Wheel: spin button or rotor element is missing in the layout.');
+}
+
+if (popupRedeemLink) {
+  popupRedeemLink.addEventListener('click', () => {
+    pushAnalyticsEvent('redeem_button_click', {
+      time_on_site_ms: getTimeOnSiteFrom(),
+      prize_label_en: getPrizeTranslation(lastPrizeId)
+    });
+  });
 }
 
 /* ---------- ONE-SPIN LOCK (storage + restore) ---------- */
