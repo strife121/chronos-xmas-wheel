@@ -43,6 +43,7 @@ const SECTOR_LINKS = {
   s9: 'https://p.chronos.mg/newme_rec?utm_source=landing&utm_medium=wheel&utm_campaign=newyear2026&utm_content=newme_rec'
 };
 
+const DEBUG_POST_MESSAGE = false;
 const spinSettings = { minTurns: 5, maxTurns: 7, duration: 6000 };
 const MAX_SPINS = 3;
 const TARGET_DEG = 180;
@@ -104,6 +105,19 @@ function togglePopupVisibility(visible) {
   }
 }
 
+function sendToParent(eventName, payload) {
+  try {
+    const cleanPayload = payload ? { ...payload } : {};
+    if (DEBUG_POST_MESSAGE) {
+      console.log('[chronosWheel] postMessage', eventName, cleanPayload);
+    }
+    window.parent.postMessage(
+      { source: 'chronosWheel', event: eventName, payload: cleanPayload },
+      '*'
+    );
+  } catch (e) {}
+}
+
 function reserveAttempt() {
   if (remainingSpins <= 0) return null;
   spinsUsed += 1;
@@ -119,11 +133,11 @@ function getTimeOnSiteFrom(ts = Date.now()) {
 
 function pushAnalyticsEvent(eventName, payload = {}) {
   if (!eventName) return;
+  const payloadCopy = payload ? { ...payload } : {};
+  const eventPayload = { event: eventName, ...payloadCopy };
   window.dataLayer = window.dataLayer || [];
-  window.dataLayer.push({
-    event: eventName,
-    ...payload
-  });
+  window.dataLayer.push(eventPayload);
+  sendToParent(eventName, payloadCopy);
 }
 
 function getPrizeTranslation(id) {
@@ -418,16 +432,20 @@ function handleSpinComplete() {
     pendingSpinClickTimestamp = null;
   }
 
-  window.dataLayer = window.dataLayer || [];
-  window.dataLayer.push({
-    event: 'wheel_spin',
+  const spinPayload = {
     prize_id: id,
     prize_label: label,
     prize_link: link,
     final_rotation: currentRotation,
     spin_try: attemptLabel,
     attempts_used: spinsUsed
+  };
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push({
+    event: 'wheel_spin',
+    ...spinPayload
   });
+  sendToParent('wheel_spin', spinPayload);
 
   const deadline = Date.now() + 900_000;
   saveTimerDeadline(deadline);
