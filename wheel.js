@@ -44,6 +44,7 @@ const SECTOR_LINKS = {
 };
 
 const spinSettings = { minTurns: 5, maxTurns: 7, duration: 6000 };
+const MAX_SPINS = 3;
 const TARGET_DEG = 180;
 let ORDER_OFFSET = 0;
 let BASE_SHIFT = 90;
@@ -60,10 +61,11 @@ const resultPopup = document.getElementById('resultPopup');
 const popupEmphasis = document.getElementById('popupEmphasis');
 const popupDescription = document.getElementById('popupDescription');
 const popupRedeemLink = document.getElementById('popupRedeemLink');
+const popupRespinBtn = document.getElementById('popupRespinBtn');
+const popupRespinHint = document.getElementById('popupRespinHint');
 const confettiCanvas = document.getElementById('confettiCanvas');
 
 let spinning = false;
-let hasSpun = false;
 let currentRotation = 0;
 let redeemUrl = null;
 let lastPrizeId = null;
@@ -73,6 +75,10 @@ let pendingSpinClickTimestamp = null;
 const PAGE_LOADED_AT = Date.now();
 let confettiInstance = null;
 let confettiInterval = null;
+let spinsUsed = 0;
+let remainingSpins = MAX_SPINS;
+let currentAttemptNumber = 0;
+let lastCompletedAttempt = 0;
 
 const slice = 360 / SECTORS_COUNT;
 const norm = deg => ((deg % 360) + 360) % 360;
@@ -98,6 +104,15 @@ function togglePopupVisibility(visible) {
   }
 }
 
+function reserveAttempt() {
+  if (remainingSpins <= 0) return null;
+  spinsUsed += 1;
+  currentAttemptNumber = spinsUsed;
+  remainingSpins = Math.max(0, MAX_SPINS - spinsUsed);
+  updateSpinUI();
+  return currentAttemptNumber;
+}
+
 function getTimeOnSiteFrom(ts = Date.now()) {
   return Math.max(0, (ts || Date.now()) - PAGE_LOADED_AT);
 }
@@ -114,6 +129,44 @@ function pushAnalyticsEvent(eventName, payload = {}) {
 function getPrizeTranslation(id) {
   if (!id) return '';
   return SECTOR_LABELS_EN[id] || lastPrizeLabel || '';
+}
+
+function getAttemptLabel(num) {
+  const normalized = Math.min(MAX_SPINS, Math.max(1, Number(num) || 1));
+  return `${normalized}_try`;
+}
+
+function formatAttemptsHint(count) {
+  if (count <= 0) return '';
+  if (count === 1) return 'Еще 1 попытка';
+  if (count >= 2 && count <= 4) return `Еще ${count} попытки`;
+  return `Еще ${count} попыток`;
+}
+
+function updatePrimarySpinVisibility() {
+  if (!spinBtn) return;
+  const hidePrimary = !WHEEL_LOCK_DEBUG && spinsUsed >= 1;
+  spinBtn.hidden = hidePrimary;
+  spinBtn.disabled = (!WHEEL_LOCK_DEBUG && remainingSpins <= 0) || spinning;
+}
+
+function updatePopupRespinButton() {
+  if (!popupRespinBtn) return;
+  if (remainingSpins <= 0 || spinsUsed < 1) {
+    popupRespinBtn.hidden = true;
+    popupRespinBtn.disabled = true;
+    return;
+  }
+  popupRespinBtn.hidden = false;
+  popupRespinBtn.disabled = spinning;
+  if (popupRespinHint) {
+    popupRespinHint.textContent = formatAttemptsHint(remainingSpins);
+  }
+}
+
+function updateSpinUI() {
+  updatePrimarySpinVisibility();
+  updatePopupRespinButton();
 }
 
 function ensureConfettiInstance() {
@@ -210,6 +263,7 @@ function updatePopupContent(label, link) {
 
 function openResultPopup(label, link) {
   updatePopupContent(label, link);
+  updatePopupRespinButton();
   togglePopupVisibility(true);
   startPopupConfetti();
 }
@@ -350,12 +404,16 @@ function handleSpinComplete() {
   lastPrizeLink = link;
   syncPrizeGlobals();
 
+  lastCompletedAttempt = currentAttemptNumber || spinsUsed || 1;
   updateResultText(id, label);
   openResultPopup(label, link);
+  updateSpinUI();
+  const attemptLabel = getAttemptLabel(lastCompletedAttempt);
   if (pendingSpinClickTimestamp) {
     pushAnalyticsEvent('wheel_spin_click', {
       time_on_site_ms: getTimeOnSiteFrom(pendingSpinClickTimestamp),
-      prize_label_en: getPrizeTranslation(id)
+      prize_label_en: getPrizeTranslation(id),
+      spin_try: attemptLabel
     });
     pendingSpinClickTimestamp = null;
   }
@@ -366,7 +424,9 @@ function handleSpinComplete() {
     prize_id: id,
     prize_label: label,
     prize_link: link,
-    final_rotation: currentRotation
+    final_rotation: currentRotation,
+    spin_try: attemptLabel,
+    attempts_used: spinsUsed
   });
 
   const deadline = Date.now() + 900_000;
@@ -375,26 +435,28 @@ function handleSpinComplete() {
   scrollToResult();
 
   spinning = false;
-  if (WHEEL_LOCK_DEBUG) {
-    hasSpun = false;
-    if (spinBtn) spinBtn.disabled = false;
-  } else if (spinBtn) {
-    spinBtn.disabled = true;
-  }
+  updateSpinUI();
 }
 
 function runSpin() {
-  if (!rotor || !spinBtn) return;
-
+  if (!rotor) return;
   if (spinning) return;
-  if (hasSpun && !WHEEL_LOCK_DEBUG) return;
 
-  closeResultPopup();
-  hasSpun = true;
+  if (remainingSpins <= 0 && !WHEEL_LOCK_DEBUG) return;
+  if (remainingSpins <= 0 && WHEEL_LOCK_DEBUG) {
+    spinsUsed = 0;
+    remainingSpins = MAX_SPINS;
+  }
+
+  const attemptNumber = reserveAttempt();
+  if (!attemptNumber && !WHEEL_LOCK_DEBUG) return;
+
   spinning = true;
-  spinBtn.disabled = true;
+  updateSpinUI();
   setResultMessage('Колесо крутится...');
-  pendingSpinClickTimestamp = Date.now();
+  if (!pendingSpinClickTimestamp) {
+    pendingSpinClickTimestamp = Date.now();
+  }
 
   const chosenIndex = weightedRandomIndex();
   const autoCenter = (chosenIndex + 0.5) * slice + BASE_SHIFT;
@@ -428,8 +490,14 @@ function runSpin() {
   requestAnimationFrame(frame);
 }
 
+function requestPrimarySpin() {
+  if (remainingSpins <= 0) return;
+  pendingSpinClickTimestamp = Date.now();
+  runSpin();
+}
+
 if (spinBtn && rotor) {
-  spinBtn.addEventListener('click', runSpin);
+  spinBtn.addEventListener('click', requestPrimarySpin);
 } else {
   console.warn('Wheel: spin button or rotor element is missing in the layout.');
 }
@@ -438,10 +506,26 @@ if (popupRedeemLink) {
   popupRedeemLink.addEventListener('click', () => {
     pushAnalyticsEvent('redeem_button_click', {
       time_on_site_ms: getTimeOnSiteFrom(),
-      prize_label_en: getPrizeTranslation(lastPrizeId)
+      prize_label_en: getPrizeTranslation(lastPrizeId),
+      spin_try: getAttemptLabel(lastCompletedAttempt || currentAttemptNumber || 1)
     });
   });
 }
+
+if (popupRespinBtn) {
+  popupRespinBtn.addEventListener('click', () => {
+    if (spinning || remainingSpins <= 0) return;
+    popupRespinBtn.disabled = true;
+    pendingSpinClickTimestamp = Date.now();
+    closeResultPopup();
+    setTimeout(() => {
+      updateSpinUI();
+      runSpin();
+    }, 220);
+  });
+}
+
+updateSpinUI();
 
 /* ---------- ONE-SPIN LOCK (storage + restore) ---------- */
 (function () {
@@ -494,18 +578,18 @@ if (popupRedeemLink) {
     lastPrizeLabel = payload.label || SECTOR_LABELS[payload.id] || '';
     lastPrizeLink = payload.link;
     currentRotation = Number(payload.angle) || 0;
+    spinsUsed = Math.min(MAX_SPINS, Number(payload.attempts_used) || 1);
+    remainingSpins = Math.max(0, MAX_SPINS - spinsUsed);
+    currentAttemptNumber = spinsUsed;
+    lastCompletedAttempt = spinsUsed;
     syncPrizeGlobals();
+    updateSpinUI();
 
     if (rotor) {
       rotor.style.transform = `rotate(${currentRotation}deg)`;
     }
     updateResultText(payload.id, lastPrizeLabel);
     openResultPopup(lastPrizeLabel, lastPrizeLink);
-
-    hasSpun = true;
-    if (spinBtn) {
-      spinBtn.disabled = !TEST_MODE;
-    }
 
     scrollToResult();
   }
@@ -527,6 +611,7 @@ if (popupRedeemLink) {
               label: args.prize_label,
               link: args.prize_link,
               angle: Number(args.final_rotation) || 0,
+               attempts_used: Number(args.attempts_used) || spinsUsed,
               ts: Date.now()
             };
             save(payload);
@@ -554,7 +639,7 @@ if (popupRedeemLink) {
 
   function clearTimer() {
     try {
-      clearInterval(global.countdownInterval);
+      cancelAnimationFrame(global.countdownInterval);
     } catch (e) {}
     try {
       localStorage.removeItem(TIMER_KEY);
@@ -577,18 +662,23 @@ if (popupRedeemLink) {
 
     if (spinBtn) {
       spinBtn.disabled = false;
+      spinBtn.hidden = false;
     }
     if (rotor) {
       rotor.style.transform = 'rotate(0deg)';
     }
 
-    hasSpun = false;
     spinning = false;
     currentRotation = 0;
     redeemUrl = null;
     lastPrizeId = null;
     lastPrizeLabel = null;
     lastPrizeLink = null;
+    spinsUsed = 0;
+    remainingSpins = MAX_SPINS;
+    currentAttemptNumber = 0;
+    lastCompletedAttempt = 0;
+    updateSpinUI();
     syncPrizeGlobals();
 
     console.info('✅ UI reset done');
